@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+</head>
+    <title>Kraje</title>
+</head>
+<body>
+    <script>
+        $( document ).ready(function() {
+            var name, ocn, country, currency, capital, cinfo, population, continent, flag, independent, i=0;
+            $("button").click(Country);
+            $("#name").on("keyup", function(){ //funkcja autouzupełnia opcje wyboru krajów.
+                name=document.getElementById("name").value;
+                $.getJSON("https://restcountries.com/v3.1/name/"+name, function(data){
+                    result=JSON.stringify(data);
+                    for (j=0;j<1;j++) { //pętla czyści tablice przy zmianie w polu textowym i wywołuje petle k 
+                        var ccn = []; //tablica nazw
+                        var aocn = []; //tablica nazw oficjalnych
+                        $('#sel').find('option').remove().end();
+                        for (var  k=0; k<data.length; k++) { //pętla wpisuje wszystkie nazwy krajow do listy rozwijanej wartościa nazwy oficjalnej (autor api nie dał krajom żadnych identyfikatorów)
+                            country=data[k]["name"]["common"];
+                            ocn=data[k]["name"]["official"];
+                            ccn[k] = country; //uzupełnianie tablicy nazw 
+                            aocn[k] = ocn; //uzupełnianie tablicy nazw oficjalnych
+                            $("#sel").append('<option value="'+aocn[k]+'"">'+ccn[k]+"</option>")
+                        }
+                    }
+                });
+            })
+            function Country() { //funkcja wypisuje dane 
+                name=document.getElementById("sel").value;
+                $.ajax({
+                    dataType: "json",
+                    url: "https://restcountries.com/v3.1/name/"+name+"?fullText=true"
+                })
+                $.getJSON("https://restcountries.com/v3.1/name/"+name+"?fullText=true", function(data){
+                    result=JSON.stringify(data);
+                    independent=data[i]["independent"];
+                    continent=data[i]["continents"][0];
+                    flag=data[i]["flags"]["svg"];
+                    country=data[i]["name"]["official"];
+                    cinfo=data[i]["capitalInfo"];
+                    if(cinfo.latlng){ //sprawdzenie czy istnieje stolica w celu unikniecia błędów
+                        capital=data[i]["capital"][0];
+                    }else{                     
+                        capital = "None";
+                    };
+                    currency=data[i].currencies;
+                    currency=Object.values(currency);
+                    currency=currency[0].name;
+                    population=data[i]["population"];
+                    document.getElementById("kontynent").innerHTML=continent;
+                    document.getElementById("pnk").innerHTML=country;
+                    document.getElementById("stolica").innerHTML=capital;
+                    document.getElementById("waluta").innerHTML=currency;
+                    document.getElementById("populacja").innerHTML=population;
+                    document.getElementById("img").innerHTML="<img src='"+flag+"'class='col-12 border'>";
+                })
+            };
+        });
+    </script>
+    <header class="navbar bg-dark">
+        <div class="container">
+            <h1 class="text-light">Informacje o krajach</h1>
+        </div>
+    </header>
+    <section class="col-12  mt-5 row">
+        <div class="col-2"></div>
+        <div class="col-3">
+            <input type="text" name="name" id="name" class="col-12" >
+            <select name="sel" id="sel" class="col-12 mt-2">
+            </select>
+            <div class="col-12 border mt-5" id="kontynent">Kontynent</div>
+            <div class="col-12 border mt-2" id="pnk">Pełna nazwa kraju</div>
+            <div class="col-12 border mt-2" id="stolica">Stolica</div>
+            <div class="col-12 border mt-2" id="waluta">Waluta</div>
+            <div class="col-12 border mt-2" id="populacja">Populacja</div>
+            <button name="button" class="mt-2">Wyświetl informacje</button>
+        </div>
+        <div class="col-2"></div>
+        <div class="col-3" id="img">
+        </div>
+    </section>
+    <footer class="nav justify-content-end bg-dark fixed-bottom">        
+        <div class="nav-item">
+            <h2 class="nav-link text-light">API: https://restcountries.com/v3.1</h2>
+        </div>
+        <div class="nav-item">
+            <h2 class="nav-link text-light">Adrian Dobrowolski</h2>
+        </div>
+    </footer>
+</body>
+</html>
